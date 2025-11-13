@@ -1,0 +1,15 @@
+/home/marco/Exercise3/build/CMakeFiles/assignment_03.dir
+/home/marco/Exercise3/build/CMakeFiles/assignment_03_copy_shader.dir
+/home/marco/Exercise3/build/CMakeFiles/edit_cache.dir
+/home/marco/Exercise3/build/CMakeFiles/rebuild_cache.dir
+/home/marco/Exercise3/build/external/glad/CMakeFiles/glad.dir
+/home/marco/Exercise3/build/external/glad/CMakeFiles/edit_cache.dir
+/home/marco/Exercise3/build/external/glad/CMakeFiles/rebuild_cache.dir
+/home/marco/Exercise3/build/external/stb_image/CMakeFiles/stb_image.dir
+/home/marco/Exercise3/build/external/stb_image/CMakeFiles/edit_cache.dir
+/home/marco/Exercise3/build/external/stb_image/CMakeFiles/rebuild_cache.dir
+/home/marco/Exercise3/build/external/glfw/CMakeFiles/edit_cache.dir
+/home/marco/Exercise3/build/external/glfw/CMakeFiles/rebuild_cache.dir
+/home/marco/Exercise3/build/external/glfw/src/CMakeFiles/glfw.dir
+/home/marco/Exercise3/build/external/glfw/src/CMakeFiles/edit_cache.dir
+/home/marco/Exercise3/build/external/glfw/src/CMakeFiles/rebuild_cache.dir

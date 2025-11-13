@@ -1,0 +1,2 @@
+# Hashes of file build rules.
+7c3ad86b49ad6fa4a5578025ddb6ae74 CMakeFiles/assignment_03_copy_shader
