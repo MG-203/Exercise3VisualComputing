@@ -184,37 +184,37 @@ void sceneInit(float width, float height) {
 
     /* origin of "3D-Model" */
     float baseX = 0.0f;
-    float baseY = 1.0f;  // Half of 2.0f
+    float baseY = 1.0f;  
     float baseZ = 0.0f;
 
     /* cubes */
-    sScene.baseCarScalingMatrix = Matrix4D::scale(1.0f, 0.5f, 2.0f);  // Half of (2.0, 1.0, 4.0)
+    sScene.baseCarScalingMatrix = Matrix4D::scale(1.0f, 0.5f, 2.0f);  
     sScene.baseCarTranslationMatrix = Matrix4D::translation({baseX, baseY, baseZ});
     sScene.baseCarTransformationMatrix = Matrix4D::identity();
 
-    sScene.windowCarScalingMatrix = Matrix4D::scale(1.0f, 0.5f, 0.5f);  // Half of (2.0, 1.0, 1.0)
-    sScene.windowCarTranslationMatrix = Matrix4D::translation({baseX, baseY + 1.0f, baseZ + 0.5f});  // Half offsets
+    sScene.windowCarScalingMatrix = Matrix4D::scale(1.0f, 0.5f, 0.5f);  
+    sScene.windowCarTranslationMatrix = Matrix4D::translation({baseX, baseY + 1.0f, baseZ + 0.5f});  
     sScene.windowCarTransformationMatrix = Matrix4D::identity();
 
     /* cylinders */
-    sScene.bottomLeftWheelScalingMatrix = Matrix4D::scale(0.1f, 0.5f, 0.5f);  // Half of (0.2, 1.0, 1.0)
-    sScene.bottomLeftWheelTranslationMatrix = Matrix4D::translation({baseX + 1.1f, baseY - 0.5f, baseZ - 1.1f});  // Half offsets
+    sScene.bottomLeftWheelScalingMatrix = Matrix4D::scale(0.1f, 0.5f, 0.5f);  
+    sScene.bottomLeftWheelTranslationMatrix = Matrix4D::translation({baseX + 1.1f, baseY - 0.5f, baseZ - 1.1f});  
     sScene.bottomLeftWheelTransformationMatrix = Matrix4D::identity();
 
-    sScene.bottomRightWheelScalingMatrix = Matrix4D::scale(0.1f, 0.5f, 0.5f);  // Half of (0.2, 1.0, 1.0)
-    sScene.bottomRightWheelTranslationMatrix = Matrix4D::translation({baseX - 1.1f, baseY - 0.5f, baseZ - 1.1f});  // Half offsets
+    sScene.bottomRightWheelScalingMatrix = Matrix4D::scale(0.1f, 0.5f, 0.5f);  
+    sScene.bottomRightWheelTranslationMatrix = Matrix4D::translation({baseX - 1.1f, baseY - 0.5f, baseZ - 1.1f}); 
     sScene.bottomRightWheelTransformationMatrix = Matrix4D::identity();
 
-    sScene.topLeftWheelScalingMatrix = Matrix4D::scale(0.1f, 0.35f, 0.35f);  // Half of (0.2, 0.7, 0.7)
-    sScene.topLeftWheelTranslationMatrix = Matrix4D::translation({baseX + 1.1f, baseY - 0.575f, baseZ + 1.3f});  // Half offsets
+    sScene.topLeftWheelScalingMatrix = Matrix4D::scale(0.1f, 0.35f, 0.35f);  
+    sScene.topLeftWheelTranslationMatrix = Matrix4D::translation({baseX + 1.1f, baseY - 0.575f, baseZ + 1.3f});  
     sScene.topLeftWheelTransformationMatrix = Matrix4D::identity();
 
-    sScene.topRightWheelScalingMatrix = Matrix4D::scale(0.1f, 0.35f, 0.35f);  // Half of (0.2, 0.7, 0.7)
-    sScene.topRightWheelTranslationMatrix = Matrix4D::translation({baseX - 1.1f, baseY - 0.575f, baseZ + 1.3f});  // Half offsets
+    sScene.topRightWheelScalingMatrix = Matrix4D::scale(0.1f, 0.35f, 0.35f);  
+    sScene.topRightWheelTranslationMatrix = Matrix4D::translation({baseX - 1.1f, baseY - 0.575f, baseZ + 1.3f});  
     sScene.topRightWheelTransformationMatrix = Matrix4D::identity();
 
-    sScene.spareWheelScalingMatrix = Matrix4D::scale(0.1f, 0.35f, 0.35f);  // Half of (0.2, 0.7, 0.7)
-    sScene.spareWheelTranslationMatrix = Matrix4D::translation({baseX, baseY + 0.3f, baseZ - 2.1f});  // Half offsets
+    sScene.spareWheelScalingMatrix = Matrix4D::scale(0.1f, 0.35f, 0.35f);  
+    sScene.spareWheelTranslationMatrix = Matrix4D::translation({baseX, baseY + 0.3f, baseZ - 2.1f});  
     sScene.spareWheelTransformationMatrix = Matrix4D::Matrix4D::rotationY(M_PI / 2.0f);
 
     sScene.cubeSpinRadPerSecond = M_PI / 2.0f;
@@ -237,7 +237,7 @@ static Vector3D extractPosition(const Matrix4D &m) {
     };
 }
 
-
+// updates the position of the car and all its components, and adjusts the height based on ground collision
 void updateCarPosition(Matrix4D translation_matrix) {
 
     // update all components of the Car by the same translation-matrix
@@ -249,8 +249,8 @@ void updateCarPosition(Matrix4D translation_matrix) {
     sScene.topRightWheelTranslationMatrix = translation_matrix * sScene.topRightWheelTranslationMatrix;
     sScene.spareWheelTranslationMatrix = translation_matrix * sScene.spareWheelTranslationMatrix;
 
-    const float frontWheelRadius = 0.35f;  // Half of 0.7f
-    const float rearWheelRadius  = 0.5f;   // Half of 1.0f
+    const float frontWheelRadius = 0.35f;  
+    const float rearWheelRadius  = 0.5f;   
 
     // get the current positions of all four wheels
     Vector3D blCenter = extractPosition(sScene.bottomLeftWheelTranslationMatrix);
@@ -316,10 +316,10 @@ void updateCarRotation(const Matrix4D& rotationMatrix)
 void sceneUpdate(float dt) {
 
     /* constants */
-    const float frontWheelRadius = 0.35f;  // Half of 0.7f
-    const float rearWheelRadius = 0.5f;    // Half of 1.0f
-    const float wheelBase = 2.0f;          // Half of 4.0f
-    const float carWidth = 1.0f;           // Half of 2.0f
+    const float frontWheelRadius = 0.35f; 
+    const float rearWheelRadius = 0.5f;    
+    const float wheelBase = 2.0f;          
+    const float carWidth = 1.0f;           
     const float maxSteeringAngle = to_radians(25.0f);
 
     /* if 'w' / 's' pressed, car should move forward / backward */
