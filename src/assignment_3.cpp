@@ -164,7 +164,7 @@ void sceneInit(float width, float height) {
     sScene.zoomSpeedMultiplier = 0.05f;
 
     /* setup objects in scene and create opengl buffers for meshes */
-    sScene.ground = groundCreate({0.15f, 0.45f, 0.15f});
+    sScene.ground = groundCreate({0.15f, 0.35f, 0.15f});
 
     /* car */
     sScene.carTransformationMatrix = Matrix4D::identity();

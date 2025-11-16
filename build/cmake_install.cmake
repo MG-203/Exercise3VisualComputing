@@ -1,4 +1,4 @@
-# Install script for directory: /home/marco/Exercise3
+# Install script for directory: /home/marcogeisler/Programmieraufgaben/Exercise3VisualComputing
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,9 +44,9 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/marco/Exercise3/build/external/glad/cmake_install.cmake")
-  include("/home/marco/Exercise3/build/external/stb_image/cmake_install.cmake")
-  include("/home/marco/Exercise3/build/external/glfw/cmake_install.cmake")
+  include("/home/marcogeisler/Programmieraufgaben/Exercise3VisualComputing/build/external/glad/cmake_install.cmake")
+  include("/home/marcogeisler/Programmieraufgaben/Exercise3VisualComputing/build/external/stb_image/cmake_install.cmake")
+  include("/home/marcogeisler/Programmieraufgaben/Exercise3VisualComputing/build/external/glfw/cmake_install.cmake")
 
 endif()
 
@@ -58,5 +58,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/marco/Exercise3/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/marcogeisler/Programmieraufgaben/Exercise3VisualComputing/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

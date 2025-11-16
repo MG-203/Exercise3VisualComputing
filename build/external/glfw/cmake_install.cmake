@@ -1,4 +1,4 @@
-# Install script for directory: /home/marco/Exercise3/external/glfw
+# Install script for directory: /home/marcogeisler/Programmieraufgaben/Exercise3VisualComputing/external/glfw
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,7 +44,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/marco/Exercise3/build/external/glfw/src/cmake_install.cmake")
+  include("/home/marcogeisler/Programmieraufgaben/Exercise3VisualComputing/build/external/glfw/src/cmake_install.cmake")
 
 endif()
 

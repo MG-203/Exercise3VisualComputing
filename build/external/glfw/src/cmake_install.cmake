@@ -1,4 +1,4 @@
-# Install script for directory: /home/marco/Exercise3/external/glfw/src
+# Install script for directory: /home/marcogeisler/Programmieraufgaben/Exercise3VisualComputing/external/glfw/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

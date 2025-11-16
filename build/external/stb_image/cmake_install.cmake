@@ -1,4 +1,4 @@
-# Install script for directory: /home/marco/Exercise3/external/stb_image
+# Install script for directory: /home/marcogeisler/Programmieraufgaben/Exercise3VisualComputing/external/stb_image
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

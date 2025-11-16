@@ -38,6 +38,17 @@ struct Ground {
  */
 Ground groundCreate(const Vector3D &color);
 
+
+/**
+ * @brief Returns the height of the ground at a specific position.
+ *
+ * @param ground Ground object.
+ * @param pos Position to query.
+ *
+ * @return Height of the ground at the specified position.
+ */
+float groundGetHeightAt(const Ground &ground, const Vector3D &pos);
+
 /**
  * @brief Cleanup and delete all OpenGL buffers of the ground mesh.
  *
