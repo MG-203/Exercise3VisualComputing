@@ -64,7 +64,6 @@ float groundGetHeightAt(const Ground &ground, const Vector3D &pos) {
 }
 
 
-
 void groundDelete(Ground &ground) { 
     meshDelete(ground.mesh);
 }
