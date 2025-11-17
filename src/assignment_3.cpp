@@ -8,12 +8,19 @@
 
 #include "ground.h"
 
+// Forward-declaration
+void updateCarRotation(const Matrix4D& rotationMatrix);
+static Vector3D getCarPosition();
+
 /* struct holding all necessary state variables for scene */
 struct {
     /* camera */
     Camera camera;
     bool cameraFollowPickup;
     float zoomSpeedMultiplier;
+    bool cameraChaseMode;
+    float lastMovementDirection;
+
 
     /* game objects */
     Ground ground;
@@ -120,6 +127,35 @@ void callbackKey(GLFWwindow *window, int key, int scancode, int action, int mods
     if (key == GLFW_KEY_D) {
         sInput.buttonPressed[3] = (action == GLFW_PRESS || action == GLFW_REPEAT);
     }
+
+    // Switch to orbit camera mode (mode 1)
+    if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+        sScene.cameraFollowPickup = false;
+        sScene.cameraChaseMode = false;
+        resetCameraRotation(sScene.camera);
+        sScene.camera.position = {12.0f, 4.0f, -12.0f};
+        sScene.camera.lookAt   = {0.0f, 0.0f, 0.0f};
+    }
+
+    // Switch to tower follow camera mode (mode 2)
+    if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+        sScene.cameraFollowPickup = true;
+        sScene.cameraChaseMode = false;
+        resetCameraRotation(sScene.camera);
+
+        // Static position
+        sScene.camera.position = {12.0f, 8.0f, -12.0f};
+    }
+
+    // Switch to chase camera mode (mode 3)
+    if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+        sScene.cameraFollowPickup = true;
+        sScene.cameraChaseMode = true;
+        resetCameraRotation(sScene.camera);
+    }
+
+
+
 }
 
 /* GLFW callback function for mouse position events */
@@ -161,7 +197,12 @@ void sceneInit(float width, float height) {
     /* initialize camera */
     sScene.camera = cameraCreate(width, height, to_radians(45.0f), 0.01f, 500.0f, {12.0f, 4.0f, -12.0f});
     sScene.cameraFollowPickup = false;
+    sScene.cameraChaseMode = false;
     sScene.zoomSpeedMultiplier = 0.05f;
+
+    sScene.carTransformationMatrix = Matrix4D::identity();
+    sScene.lastMovementDirection = -1.0f; // start assuming forward direction
+
 
     /* setup objects in scene and create opengl buffers for meshes */
     sScene.ground = groundCreate({0.15f, 0.35f, 0.15f});
@@ -237,6 +278,135 @@ static Vector3D extractPosition(const Matrix4D &m) {
     };
 }
 
+// Returns the world position of the car's base
+static Vector3D getCarPosition() {
+    return extractPosition(sScene.baseCarTranslationMatrix);
+}
+
+
+
+// Rotates a 3D vector around an axis by a given angle
+static Vector3D rotateVectorAroundAxis(const Vector3D &v, const Vector3D &axis, float angle) {
+    Vector3D a = normalize(axis);
+    float c = cosf(angle);
+    float s = sinf(angle);
+    float oneMinusC = 1.0f - c;
+
+    // Rodrigues' rotation formula: v_rot = v*c + cross(a, v)*s + a*dot(a, v)*(1-c)
+    Vector3D term1 = v * c;
+    Vector3D term2 = cross(a, v) * s;
+    Vector3D term3 = a * (dot(a, v) * oneMinusC);
+
+    return term1 + term2 + term3;
+}
+
+// Creates a 4x4 rotation matrix from an axis-angle representation
+static Matrix4D createAxisAngleRotation(const Vector3D &axis, float angle) {
+    Vector3D a = normalize(axis);
+
+    Vector3D xAxis = rotateVectorAroundAxis({1.0f, 0.0f, 0.0f}, a, angle);
+    Vector3D yAxis = rotateVectorAroundAxis({0.0f, 1.0f, 0.0f}, a, angle);
+    Vector3D zAxis = rotateVectorAroundAxis({0.0f, 0.0f, 1.0f}, a, angle);
+
+    Matrix4D R = Matrix4D::identity();
+
+    // column 0 = right (x-axis)
+    R.n[0][0] = xAxis.x;
+    R.n[0][1] = xAxis.y;
+    R.n[0][2] = xAxis.z;
+
+    // column 1 = up (y-axis)
+    R.n[1][0] = yAxis.x;
+    R.n[1][1] = yAxis.y;
+    R.n[1][2] = yAxis.z;
+
+    // column 2 = forward (z-axis)
+    R.n[2][0] = zAxis.x;
+    R.n[2][1] = zAxis.y;
+    R.n[2][2] = zAxis.z;
+
+    return R;
+}
+
+// Aligns the car orientation with the ground underneath its wheels
+static void alignCarWithGround() {
+    const float frontWheelRadius = 0.35f;
+    const float rearWheelRadius  = 0.5f;
+
+    // get wheel centers in world space
+    Vector3D blCenter = extractPosition(sScene.bottomLeftWheelTranslationMatrix);
+    Vector3D brCenter = extractPosition(sScene.bottomRightWheelTranslationMatrix);
+    Vector3D flCenter = extractPosition(sScene.topLeftWheelTranslationMatrix);
+    Vector3D frCenter = extractPosition(sScene.topRightWheelTranslationMatrix);
+
+    // compute ground contact points (y from ground height, x/z from wheel centers)
+    Vector3D blContact = {
+        blCenter.x,
+        groundGetHeightAt(sScene.ground, blCenter),
+        blCenter.z
+    };
+    Vector3D brContact = {
+        brCenter.x,
+        groundGetHeightAt(sScene.ground, brCenter),
+        brCenter.z
+    };
+    Vector3D flContact = {
+        flCenter.x,
+        groundGetHeightAt(sScene.ground, flCenter),
+        flCenter.z
+    };
+    Vector3D frContact = {
+        frCenter.x,
+        groundGetHeightAt(sScene.ground, frCenter),
+        frCenter.z
+    };
+
+    // back and front midpoints
+    Vector3D backMid  = 0.5f * (blContact + brContact);
+    Vector3D frontMid = 0.5f * (flContact + frContact);
+
+    // triangle edges for normal computation
+    Vector3D e1 = brContact - blContact;
+    Vector3D e2 = frontMid - blContact;
+
+    Vector3D targetUp = normalize(cross(e2, e1));
+
+    // ensure the normal points upwards
+    if (dot(targetUp, {0.0f, 1.0f, 0.0f}) < 0.0f) {
+        targetUp = targetUp * -1.0f;
+    }
+
+    // current car up vector in world space
+    Vector4D upLocal  = {0.0f, 1.0f, 0.0f, 0.0f};
+    Vector4D worldUp4 = sScene.carTransformationMatrix * upLocal;
+    Vector3D currentUp = normalize(Vector3D{worldUp4.x, worldUp4.y, worldUp4.z});
+
+    // angle between current up and target up
+    float dotUp = dot(currentUp, targetUp);
+    if (dotUp > 1.0f) dotUp = 1.0f;
+    if (dotUp < -1.0f) dotUp = -1.0f;
+
+    float angle = acosf(dotUp);
+
+    // if almost aligned, do nothing
+    if (angle < 1e-4f) {
+        return;
+    }
+
+    // rotation axis from current up to target up
+    Vector3D axis = cross(currentUp, targetUp);
+    float axisLenSq = dot(axis, axis);
+    if (axisLenSq < 1e-8f) {
+        return;
+    }
+
+    Matrix4D rot = createAxisAngleRotation(axis, angle);
+
+    // apply rotation around the car pivot 
+    updateCarRotation(rot);
+}
+
+
 // updates the position of the car and all its components, and adjusts the height based on ground collision
 void updateCarPosition(Matrix4D translation_matrix) {
 
@@ -284,6 +454,8 @@ void updateCarPosition(Matrix4D translation_matrix) {
     sScene.topRightWheelTranslationMatrix    = heightCorrection * sScene.topRightWheelTranslationMatrix;
     sScene.spareWheelTranslationMatrix       = heightCorrection * sScene.spareWheelTranslationMatrix;
 
+    // align the car orientation with the ground after correcting the height
+    alignCarWithGround();
 }
 
 void updateCarRotation(const Matrix4D& rotationMatrix)
@@ -341,6 +513,7 @@ void sceneUpdate(float dt) {
 
     /* update forward movement */
     if (forwardMovement != 0) {
+        sScene.lastMovementDirection = forwardMovement;
         /* direction in local space */
         Vector3D forward = {0.0f, 0.0f, -1.0f};
         Matrix4D carRotation = sScene.carTransformationMatrix;
@@ -390,6 +563,42 @@ void sceneUpdate(float dt) {
             updateCarRotation(carTurn);
         }
 
+    }
+
+        // Update camera based on current camera mode
+    if (sScene.cameraFollowPickup) {
+        Vector3D carPos = getCarPosition();
+
+        if (sScene.cameraChaseMode) {
+            // chase camera: behind the car when driving forward, in front when driving backward
+
+            // local forward direction of the car (0,0,-1) transformed to world space
+            Vector4D localForward = {0.0f, 0.0f, -1.0f, 0.0f};
+            Vector4D worldForward4 = sScene.carTransformationMatrix * localForward;
+            Vector3D forwardDir = normalize(Vector3D{worldForward4.x, worldForward4.y, worldForward4.z});
+
+            float distanceBehind = 14.0f;
+            float heightAbove    = 10.0f;
+
+            // decide on which side of the car the camera should be
+            float movementDir;
+            if (forwardMovement != 0.0f) {
+                // forwardMovement < 0 -> driving forward, > 0 -> driving backward
+                movementDir = (forwardMovement < 0.0f) ? 1.0f : -1.0f;
+            } else {
+                movementDir = (sScene.lastMovementDirection < 0.0f) ? 1.0f : -1.0f;
+            }
+
+            // place the camera behind or in front of the car depending on movementDir
+            Vector3D camPos = carPos + forwardDir * (movementDir * distanceBehind)
+                              + Vector3D{0.0f, heightAbove, 0.0f};
+
+            sScene.camera.position = camPos;
+            sScene.camera.lookAt   = carPos;
+        } else {
+            // tower mode: static camera position, only lookAt follows the car
+            sScene.camera.lookAt = carPos;
+        }
     }
 }
 
